@@ -21,6 +21,5 @@ RUN python3 -m venv ${VIRTUAL_ENV} && ${VIRTUAL_ENV}/bin/pip install --no-cache-
 RUN ${VIRTUAL_ENV}/bin/pip install --no-cache-dir paddlepaddle==3.2.0 paddleocr==3.3.1
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/scripts ./scripts
-COPY --from=build /app/workspace ./workspace
 EXPOSE 3000
 CMD ["node", "dist/apps/api/main.js"]

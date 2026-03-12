@@ -33,9 +33,9 @@ export const documentManagementConfig = registerAs('documentManagement', () => (
     model: process.env.OPENAI_MODEL ?? 'gpt-4.1-mini',
   },
   storage: {
-    documentStorageDir: process.env.DOCUMENT_STORAGE_DIR ?? '.openclaw/media/inbound',
-    manualDepotDir: process.env.MANUAL_DEPOT_DIR ?? 'workspace/inbound/manual-depot',
-    processedDepotDir: process.env.PROCESSED_DEPOT_DIR ?? 'workspace/inbound/processed',
+    documentStorageDir: process.env.DOCUMENT_STORAGE_DIR ?? 'data/inbound',
+    manualDepotDir: process.env.MANUAL_DEPOT_DIR ?? 'data/manual-depot',
+    processedDepotDir: process.env.PROCESSED_DEPOT_DIR ?? 'data/processed',
   },
   analysis: {
     enableVisionOcr: process.env.ENABLE_VISION_OCR === 'true',

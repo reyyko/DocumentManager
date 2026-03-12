@@ -1,8 +1,8 @@
 {
-  "name": "openclaw-document-management",
+  "name": "drive-gmail-document-agent",
   "version": "0.1.0",
   "private": true,
-  "description": "OpenClaw monorepo skeleton with DocumentManagementSkill for Google Drive.",
+  "description": "Document management agent for Google Drive and Gmail ingestion, analysis, and search.",
   "scripts": {
     "build": "tsc -p apps/api/tsconfig.json",
     "start": "node dist/apps/api/main.js",

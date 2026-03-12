@@ -1,70 +1,49 @@
-# OpenClaw local container
+# Drive/Gmail Document Agent
 
-This project now combines the official OpenClaw gateway with a local document-management API runtime.
-The document pipeline itself runs locally by default and does not require the OpenAI API.
-Local OCR for scanned PDFs and images is handled with PaddleOCR when enabled.
-The Google Drive module now prioritizes archival quality: files can be renamed to a standardized format and moved in place inside the business tree.
+NestJS agent specialized in document ingestion, classification, search, and audit for Google Drive and Gmail.
+It runs as a standalone API with PostgreSQL and Redis, without the previous OpenClaw wrapper.
 
-## Structure
+## What it does
 
-- `docker-compose.yml`: official-style OpenClaw gateway + CLI stack
-- `apps/api/`: NestJS document-management pipeline (ingestion, queue, analysis, Drive, audit, search)
-- `apps/api/`: NestJS document-management pipeline (ingestion, queue, analysis, Drive crawler, audit, reporting)
-- `workspace/skills/gmail/`: workspace Gmail skill through Maton
-- `workspace/skills/google-drive/`: workspace Google Drive skill through Maton
-- `.openclaw/`: runtime state and config generated locally
-- `scripts/setup-openclaw.ps1`: Windows-friendly bootstrap script
+- polls Gmail for attachments matching a configurable query
+- polls Google Drive folders and can crawl/sort existing Drive trees
+- stores inbound files locally under `data/`
+- runs OCR/document analysis and keeps an audit trail in PostgreSQL
+- exposes HTTP endpoints to ingest, search, approve, and download documents
 
-## First setup
+## Repo structure
 
-1. Fill `.env` from `.env.example`.
-2. Run:
+- `apps/api/`: NestJS API and document-management module
+- `scripts/`: OCR and document inspection helpers
+- `docker-compose.yml`: local stack for API + PostgreSQL + Redis
+- `Dockerfile.api`: production image for the agent
 
-```powershell
-.\scripts\setup-openclaw.ps1
-```
+## Setup
 
-The script:
-
-- creates the OpenClaw state/workspace folders
-- ensures gateway env defaults exist
-- writes a minimal `openclaw.json`
-- sets the default model to `openai-codex/gpt-5.4`
-- enables Discord when a token is present
-- derives the Discord guild from `DISCORD_VD_MANAGER_CHANNEL_ID` when possible
-- mounts the Maton-backed `gmail` and `google-drive` workspace skills
-- creates the manual inbound folders under `workspace/inbound/`
-- starts `openclaw-gateway`, `document-api`, `postgres`, and `redis`
-
-## Codex login
-
-This setup is aligned for ChatGPT/Codex account auth for the gateway.
-The backend document sorter does not consume your ChatGPT subscription directly.
-
-Run:
-
-```powershell
-docker compose run --rm openclaw-cli models auth login --provider openai-codex
-```
-
-Then verify:
-
-```powershell
-docker compose run --rm openclaw-cli models status
-```
-
-## Daily commands
-
-Start or refresh:
+1. Copy `.env.example` to `.env`.
+2. Fill the Google OAuth variables:
+   `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_REDIRECT_URI`
+3. Set your source scopes:
+   `GMAIL_INGEST_ENABLED=true`
+   `GOOGLE_DRIVE_INGEST_FOLDER_IDS=...`
+4. Start the stack:
 
 ```powershell
 docker compose up -d --build
 ```
 
-See logs:
+Local runtime folders are created under `data/`:
+
+- `data/inbound`
+- `data/manual-depot`
+- `data/processed`
+
+## Useful commands
+
+Start or rebuild:
 
 ```powershell
-docker compose logs -f openclaw-gateway
+docker compose up -d --build
 ```
 
 API logs:
@@ -73,43 +52,13 @@ API logs:
 docker compose logs -f document-api
 ```
 
-Open dashboard:
+Stop:
 
 ```powershell
-docker compose run --rm openclaw-cli dashboard --no-open
+docker compose down
 ```
 
-List skills seen by OpenClaw:
-
-```powershell
-docker compose run --rm openclaw-cli skills
-```
-
-Live Google access is now handled by Maton skills.
-Keep `MATON_API_KEY`, `MATON_GOOGLE_DRIVE_CONNECTION_ID`, and `MATON_GMAIL_CONNECTION_ID` in `.env`.
-Keep `NATIVE_GOOGLE_CONNECTORS_ENABLED=false` unless you explicitly want to reactivate the old OAuth-based Google connectors.
-
-Manual folder ingestion:
-
-- drop files into `workspace/inbound/manual-depot`
-- the API polls the folder and queues new documents automatically
-
-HTTP file ingestion:
-
-```powershell
-curl -X POST http://127.0.0.1:3000/documents/ingest-file/manual `
-  -F "file=@C:\path\to\document.pdf" `
-  -F "sourceId=manual-001" `
-  -F "sourceLabel=Depot manuel"
-```
-
-Webhook ingestion for Odoo / Shopify:
-
-```powershell
-curl -X POST http://127.0.0.1:3000/documents/webhook/shopify `
-  -H "Content-Type: application/json" `
-  -d "{\"originalFileName\":\"facture.pdf\",\"fileUrl\":\"https://example.com/facture.pdf\",\"sourceId\":\"shopify-123\"}"
-```
+## Main API endpoints
 
 List recent documents:
 
@@ -117,8 +66,27 @@ List recent documents:
 curl http://127.0.0.1:3000/documents?limit=20
 ```
 
-Stop:
+Search Google Drive documents:
 
 ```powershell
-docker compose down
+curl -X POST http://127.0.0.1:3000/documents/search `
+  -H "Content-Type: application/json" `
+  -d "{\"query\":\"contrat transport mars 2026\",\"requesterDiscordId\":\"123456789\"}"
+```
+
+Trigger Drive reprocessing:
+
+```powershell
+curl -X POST http://127.0.0.1:3000/documents/reprocess-drive `
+  -H "Content-Type: application/json" `
+  -d "{\"limit\":50,\"statuses\":[\"attention-required\",\"failed\"]}"
+```
+
+Manual file ingestion:
+
+```powershell
+curl -X POST http://127.0.0.1:3000/documents/ingest-file/manual `
+  -F "file=@C:\path\to\document.pdf" `
+  -F "sourceId=manual-001" `
+  -F "sourceLabel=Depot manuel"
 ```

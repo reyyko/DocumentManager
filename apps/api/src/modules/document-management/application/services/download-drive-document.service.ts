@@ -13,7 +13,7 @@ export class DownloadDriveDocumentService {
 
   async execute(fileId: string) {
     if (!this.configService.get<boolean>('documentManagement.nativeGoogle.enabled')) {
-      throw new ServiceUnavailableException('Native Google Drive download is disabled. Use the Maton Google Drive skill.');
+      throw new ServiceUnavailableException('Native Google Drive download is disabled. Configure Google OAuth credentials first.');
     }
 
     const file = await this.driveStorage.downloadFile(fileId);

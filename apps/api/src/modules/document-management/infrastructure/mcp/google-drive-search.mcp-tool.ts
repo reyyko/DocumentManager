@@ -18,7 +18,7 @@ export class GoogleDriveSearchMcpTool implements McpSearchPort {
       name: 'google_drive_document_search',
       description: enabled
         ? 'Find company documents in Google Drive from a natural language request and return retrievable files.'
-        : 'Disabled. Google Drive actions are delegated to the Maton agent skill.',
+        : 'Disabled. Configure Google OAuth credentials to enable native Google Drive search.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -32,7 +32,7 @@ export class GoogleDriveSearchMcpTool implements McpSearchPort {
 
   async handle(input: SearchDocumentsInput): Promise<Record<string, unknown>> {
     if (!this.configService.get<boolean>('documentManagement.nativeGoogle.enabled')) {
-      throw new ServiceUnavailableException('Native Google Drive MCP access is disabled. Use the Maton Google Drive skill.');
+      throw new ServiceUnavailableException('Native Google Drive MCP access is disabled. Configure Google OAuth credentials first.');
     }
 
     const result = await this.searchDocumentsService.execute(input);

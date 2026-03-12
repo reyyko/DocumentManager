@@ -16,7 +16,7 @@ export class SearchDocumentsService {
 
   async execute(input: SearchDocumentsInput) {
     if (!this.configService.get<boolean>('documentManagement.nativeGoogle.enabled')) {
-      throw new ServiceUnavailableException('Native Google Drive search is disabled. Use the Maton Google Drive skill.');
+      throw new ServiceUnavailableException('Native Google Drive search is disabled. Configure Google OAuth credentials first.');
     }
 
     const payload = searchDocumentsSchema.parse(input);

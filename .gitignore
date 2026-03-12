@@ -1,5 +1,6 @@
 node_modules
 dist
+data/
 /.openclaw/
 /_archive/
 /__openclaw_upstream/

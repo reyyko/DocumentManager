@@ -101,7 +101,7 @@ export class IngestDocumentService {
   }
 
   private async persistInboundFile(document: DocumentEntity): Promise<void> {
-    const configuredDir = this.configService.get<string>('documentManagement.storage.documentStorageDir') ?? '.openclaw/media/inbound';
+    const configuredDir = this.configService.get<string>('documentManagement.storage.documentStorageDir') ?? 'data/inbound';
     const storageDir = resolve(configuredDir);
     await mkdir(storageDir, { recursive: true });
 

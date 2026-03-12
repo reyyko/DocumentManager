@@ -25,10 +25,10 @@ export class SourceConnectorsService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    await mkdir(resolve(this.configService.get<string>('documentManagement.storage.manualDepotDir') ?? 'workspace/inbound/manual-depot'), {
+    await mkdir(resolve(this.configService.get<string>('documentManagement.storage.manualDepotDir') ?? 'data/manual-depot'), {
       recursive: true,
     });
-    await mkdir(resolve(this.configService.get<string>('documentManagement.storage.processedDepotDir') ?? 'workspace/inbound/processed'), {
+    await mkdir(resolve(this.configService.get<string>('documentManagement.storage.processedDepotDir') ?? 'data/processed'), {
       recursive: true,
     });
 
@@ -70,8 +70,8 @@ export class SourceConnectorsService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async pollManualDepot(): Promise<void> {
-    const manualDepotDir = resolve(this.configService.get<string>('documentManagement.storage.manualDepotDir') ?? 'workspace/inbound/manual-depot');
-    const processedDepotDir = resolve(this.configService.get<string>('documentManagement.storage.processedDepotDir') ?? 'workspace/inbound/processed');
+    const manualDepotDir = resolve(this.configService.get<string>('documentManagement.storage.manualDepotDir') ?? 'data/manual-depot');
+    const processedDepotDir = resolve(this.configService.get<string>('documentManagement.storage.processedDepotDir') ?? 'data/processed');
     const entries = await readdir(manualDepotDir, { withFileTypes: true });
 
     for (const entry of entries) {
