@@ -1,9 +1,0 @@
-{
-  "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/api/src",
-  "compilerOptions": {
-    "deleteOutDir": true
-  },
-  "monorepo": true,
-  "root": "apps/api"
-}

@@ -1,92 +1,64 @@
-# Drive/Gmail Document Agent
+# OpenClaw Document Agent
 
-NestJS agent specialized in document ingestion, classification, search, and audit for Google Drive and Gmail.
-It runs as a standalone API with PostgreSQL and Redis, without the previous OpenClaw wrapper.
+Portable OpenClaw workspace bundle for a document-management agent focused on Gmail and Google Drive.
 
-## What it does
+This repository is meant to be installed into an existing OpenClaw workspace. It does not ship a standalone app stack.
 
-- polls Gmail for attachments matching a configurable query
-- polls Google Drive folders and can crawl/sort existing Drive trees
-- stores inbound files locally under `data/`
-- runs OCR/document analysis and keeps an audit trail in PostgreSQL
-- exposes HTTP endpoints to ingest, search, approve, and download documents
+## Included
 
-## Repo structure
+- workspace root files for the agent personality and behavior
+- `skills/gmail/` for live Gmail access through Maton
+- `skills/google-drive/` for live Google Drive access through Maton
+- `skills/document-management-agent/` for document triage, naming, OCR, and archive workflow
 
-- `apps/api/`: NestJS API and document-management module
-- `scripts/`: OCR and document inspection helpers
-- `docker-compose.yml`: local stack for API + PostgreSQL + Redis
-- `Dockerfile.api`: production image for the agent
+## Install into an existing OpenClaw workspace
 
-## Setup
+Linux:
 
-1. Copy `.env.example` to `.env`.
-2. Fill the Google OAuth variables:
-   `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_REDIRECT_URI`
-3. Set your source scopes:
-   `GMAIL_INGEST_ENABLED=true`
-   `GOOGLE_DRIVE_INGEST_FOLDER_IDS=...`
-4. Start the stack:
-
-```powershell
-docker compose up -d --build
+```bash
+./install-openclaw-agent.sh ~/.openclaw/workspace
 ```
 
-Local runtime folders are created under `data/`:
-
-- `data/inbound`
-- `data/manual-depot`
-- `data/processed`
-
-## Useful commands
-
-Start or rebuild:
+PowerShell:
 
 ```powershell
-docker compose up -d --build
+.\install-openclaw-agent.ps1 -WorkspacePath "$HOME/.openclaw/workspace"
 ```
 
-API logs:
+Manual install:
 
-```powershell
-docker compose logs -f document-api
+1. Copy the root markdown files into your OpenClaw workspace root.
+2. Copy the `skills/` directory into your OpenClaw workspace.
+3. Restart OpenClaw or reload the workspace.
+
+## Required environment
+
+Set these in the environment used by your OpenClaw server:
+
+- `MATON_API_KEY`
+- `MATON_GMAIL_CONNECTION_ID`
+- `MATON_GOOGLE_DRIVE_CONNECTION_ID`
+
+If you use multiple Maton connections, keep the connection IDs set explicitly.
+
+## Resulting workspace layout
+
+```text
+~/.openclaw/workspace/
+  AGENTS.md
+  IDENTITY.md
+  SOUL.md
+  USER.md
+  TOOLS.md
+  HEARTBEAT.md
+  skills/
+    gmail/
+    google-drive/
+    document-management-agent/
 ```
 
-Stop:
+## Notes
 
-```powershell
-docker compose down
-```
-
-## Main API endpoints
-
-List recent documents:
-
-```powershell
-curl http://127.0.0.1:3000/documents?limit=20
-```
-
-Search Google Drive documents:
-
-```powershell
-curl -X POST http://127.0.0.1:3000/documents/search `
-  -H "Content-Type: application/json" `
-  -d "{\"query\":\"contrat transport mars 2026\",\"requesterDiscordId\":\"123456789\"}"
-```
-
-Trigger Drive reprocessing:
-
-```powershell
-curl -X POST http://127.0.0.1:3000/documents/reprocess-drive `
-  -H "Content-Type: application/json" `
-  -d "{\"limit\":50,\"statuses\":[\"attention-required\",\"failed\"]}"
-```
-
-Manual file ingestion:
-
-```powershell
-curl -X POST http://127.0.0.1:3000/documents/ingest-file/manual `
-  -F "file=@C:\path\to\document.pdf" `
-  -F "sourceId=manual-001" `
-  -F "sourceLabel=Depot manuel"
-```
+- The agent is optimized for read, classify, rename, move, summarize, and archive workflows.
+- Filenames should stay clean and human-readable, never UUID-style.
+- The bundled OCR helper is optional and only used when PaddleOCR is available on the host.
