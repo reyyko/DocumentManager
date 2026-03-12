@@ -1,0 +1,12 @@
+node_modules
+dist
+/.openclaw/
+/_archive/
+/__openclaw_upstream/
+workspace/
+.env
+*.log
+coverage
+*.log
+__pycache__/
+*.pyc

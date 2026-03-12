@@ -1,0 +1,17 @@
+.git
+.openclaw/agents
+.openclaw/canvas
+.openclaw/cron
+.openclaw/credentials
+.openclaw/delivery-queue
+.openclaw/devices
+.openclaw/identity
+.openclaw/logs
+.openclaw/media
+node_modules
+dist
+workspace/.openclaw
+_archive
+__openclaw_upstream
+npm-debug.log
+Dockerfile

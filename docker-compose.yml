@@ -1,0 +1,135 @@
+services:
+  openclaw-gateway:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+      DISCORD_SERVER_ID: ${DISCORD_SERVER_ID:-}
+      DISCORD_OWNER_USER_ID: ${DISCORD_OWNER_USER_ID:-}
+      DISCORD_VD_MANAGER_CHANNEL_ID: ${DISCORD_VD_MANAGER_CHANNEL_ID:-}
+      GOOGLE_DRIVE_ROOT_FOLDER_ID: ${GOOGLE_DRIVE_ROOT_FOLDER_ID:-}
+      MATON_API_KEY: ${MATON_API_KEY:-}
+      MATON_GOOGLE_DRIVE_CONNECTION_ID: ${MATON_GOOGLE_DRIVE_CONNECTION_ID:-}
+      MATON_GMAIL_CONNECTION_ID: ${MATON_GMAIL_CONNECTION_ID:-}
+      INGESTION_SHARED_SECRET: ${INGESTION_SHARED_SECRET:-}
+      DEFAULT_APPROVER_DISCORD_ID: ${DEFAULT_APPROVER_DISCORD_ID:-}
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR:-./.openclaw}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-./workspace}:/home/node/.openclaw/workspace
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+    init: true
+    restart: unless-stopped
+    command:
+      [
+        "node",
+        "dist/index.js",
+        "gateway",
+        "--bind",
+        "${OPENCLAW_GATEWAY_BIND:-lan}",
+        "--port",
+        "18789"
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  openclaw-cli:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
+    network_mode: "service:openclaw-gateway"
+    cap_drop:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      BROWSER: echo
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+      DISCORD_SERVER_ID: ${DISCORD_SERVER_ID:-}
+      DISCORD_OWNER_USER_ID: ${DISCORD_OWNER_USER_ID:-}
+      DISCORD_VD_MANAGER_CHANNEL_ID: ${DISCORD_VD_MANAGER_CHANNEL_ID:-}
+      GOOGLE_DRIVE_ROOT_FOLDER_ID: ${GOOGLE_DRIVE_ROOT_FOLDER_ID:-}
+      MATON_API_KEY: ${MATON_API_KEY:-}
+      MATON_GOOGLE_DRIVE_CONNECTION_ID: ${MATON_GOOGLE_DRIVE_CONNECTION_ID:-}
+      MATON_GMAIL_CONNECTION_ID: ${MATON_GMAIL_CONNECTION_ID:-}
+      INGESTION_SHARED_SECRET: ${INGESTION_SHARED_SECRET:-}
+      DEFAULT_APPROVER_DISCORD_ID: ${DEFAULT_APPROVER_DISCORD_ID:-}
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR:-./.openclaw}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-./workspace}:/home/node/.openclaw/workspace
+    stdin_open: true
+    tty: true
+    init: true
+    entrypoint: ["node", "dist/index.js"]
+    depends_on:
+      - openclaw-gateway
+
+  document-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      POSTGRES_URL: postgres://postgres:postgres@postgres:5432/openclaw
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MANUAL_DEPOT_DIR: /app/workspace/inbound/manual-depot
+      DOCUMENT_STORAGE_DIR: /app/.openclaw/media/inbound
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR:-./.openclaw}:/app/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-./workspace}:/app/workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: openclaw
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - openclaw-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d openclaw"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - openclaw-redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  openclaw-postgres-data:
+  openclaw-redis-data:
