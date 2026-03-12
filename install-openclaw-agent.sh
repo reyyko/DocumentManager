@@ -3,7 +3,7 @@ set -euo pipefail
 
 TARGET="${1:-$HOME/.openclaw/workspace}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE_DIR="$SCRIPT_DIR/workspace-document-manager"
+SOURCE_DIR="$SCRIPT_DIR/.openclaw/workspace-document-manager"
 
 mkdir -p "$TARGET/skills"
 

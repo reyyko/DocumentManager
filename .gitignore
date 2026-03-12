@@ -1,7 +1,9 @@
 .env
 node_modules
 dist
-.openclaw/
+.openclaw/*
+!.openclaw/workspace-document-manager/
+!.openclaw/workspace-document-manager/**
 workspace/
 _archive/
 __openclaw_upstream/

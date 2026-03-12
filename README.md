@@ -1,16 +1,17 @@
 # workspace-document-manager
 
 This repository ships an OpenClaw workspace called `workspace-document-manager`.
+The workspace lives in `.openclaw/workspace-document-manager` at the repository root.
 
 It is a document-management workspace, not a standalone application. The workspace identity is defined by:
 
-- `workspace-document-manager/AGENTS.md`
-- `workspace-document-manager/BOOTSTRAP.md`
-- `workspace-document-manager/HEARTBEAT.md`
-- `workspace-document-manager/IDENTITY.md`
-- `workspace-document-manager/SOUL.md`
-- `workspace-document-manager/TOOLS.md`
-- `workspace-document-manager/USER.md`
+- `.openclaw/workspace-document-manager/AGENTS.md`
+- `.openclaw/workspace-document-manager/BOOTSTRAP.md`
+- `.openclaw/workspace-document-manager/HEARTBEAT.md`
+- `.openclaw/workspace-document-manager/IDENTITY.md`
+- `.openclaw/workspace-document-manager/SOUL.md`
+- `.openclaw/workspace-document-manager/TOOLS.md`
+- `.openclaw/workspace-document-manager/USER.md`
 
 The workspace contains exactly 2 skills:
 

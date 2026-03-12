@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$source = Join-Path $root "workspace-document-manager"
+$source = Join-Path $root ".openclaw\\workspace-document-manager"
 
 New-Item -ItemType Directory -Force -Path (Join-Path $WorkspacePath "skills") | Out-Null
 
