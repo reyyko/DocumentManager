@@ -1,15 +1,21 @@
-# OpenClaw Document Agent
+# workspace-document-manager
 
-Portable OpenClaw workspace bundle for a document-management agent focused on Gmail and Google Drive.
+This repository ships an OpenClaw workspace called `workspace-document-manager`.
 
-This repository is meant to be installed into an existing OpenClaw workspace. It does not ship a standalone app stack.
+It is a document-management workspace, not a standalone application. The workspace identity is defined by:
 
-## Included
+- `workspace-document-manager/AGENTS.md`
+- `workspace-document-manager/BOOTSTRAP.md`
+- `workspace-document-manager/HEARTBEAT.md`
+- `workspace-document-manager/IDENTITY.md`
+- `workspace-document-manager/SOUL.md`
+- `workspace-document-manager/TOOLS.md`
+- `workspace-document-manager/USER.md`
 
-- workspace root files for the agent personality and behavior
-- `skills/gmail/` for live Gmail access through Maton
-- `skills/google-drive/` for live Google Drive access through Maton
-- `skills/document-management-agent/` for document triage, naming, OCR, and archive workflow
+The workspace contains exactly 2 skills:
+
+- `gmail`
+- `google-drive`
 
 ## Install into an existing OpenClaw workspace
 
@@ -25,40 +31,24 @@ PowerShell:
 .\install-openclaw-agent.ps1 -WorkspacePath "$HOME/.openclaw/workspace"
 ```
 
-Manual install:
-
-1. Copy the root markdown files into your OpenClaw workspace root.
-2. Copy the `skills/` directory into your OpenClaw workspace.
-3. Restart OpenClaw or reload the workspace.
-
 ## Required environment
-
-Set these in the environment used by your OpenClaw server:
 
 - `MATON_API_KEY`
 - `MATON_GMAIL_CONNECTION_ID`
 - `MATON_GOOGLE_DRIVE_CONNECTION_ID`
 
-If you use multiple Maton connections, keep the connection IDs set explicitly.
-
-## Resulting workspace layout
+## Resulting layout
 
 ```text
 ~/.openclaw/workspace/
   AGENTS.md
+  BOOTSTRAP.md
+  HEARTBEAT.md
   IDENTITY.md
   SOUL.md
-  USER.md
   TOOLS.md
-  HEARTBEAT.md
+  USER.md
   skills/
     gmail/
     google-drive/
-    document-management-agent/
 ```
-
-## Notes
-
-- The agent is optimized for read, classify, rename, move, summarize, and archive workflows.
-- Filenames should stay clean and human-readable, never UUID-style.
-- The bundled OCR helper is optional and only used when PaddleOCR is available on the host.

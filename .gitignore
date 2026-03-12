@@ -8,4 +8,4 @@ __openclaw_upstream/
 __pycache__/
 *.pyc
 *.log
-tmp-openclaw-workspace/
+tmp-openclaw-workspace*/
